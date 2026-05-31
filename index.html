@@ -157,7 +157,7 @@ const AWARDS = [
       { player: "Luka Doncic", team: "jordan", award: "SCORING_TITLE", place: null, pts: 3 },
       // Conference Finals MVP (playoff series MVP — 3pts per scoring system)
       { player: "Jalen Brunson", team: "garbs", award: "CONF_MVP", place: "East Finals MVP", pts: 3 },
-      // West Finals MVP pending — Game 7 OKC vs SAS not yet played (update when decided)
+      { player: "Victor Wembanyama", team: "jake", award: "CONF_MVP", place: "West Finals MVP", pts: 3 },
       { player: "Nikola Jokic", team: "cooper", award: "STAT_LEADERS", place: "Assists", pts: 1 },
       { player: "Victor Wembanyama", team: "jake", award: "STAT_LEADERS", place: "Blocks", pts: 1 },
       { player: "Dyson Daniels", team: "jake", award: "STAT_LEADERS", place: "Steals", pts: 1 },
@@ -173,7 +173,7 @@ const AWARDS = [
       { player: "Ime Udoka", team: "jordan", award: "COACH_PLAYOFF", place: "1st Round Exit", pts: 1 },
       // Assistant coaches — fired = +1pt (Season 3)
       { player: "Willie Green", team: "jordan", award: "ASST_COACH_FIRED", place: "Fired Nov 15, 2025", pts: 1 },
-      // Mark Daigneault (Garbs) — Thunder in Conference Finals (still ongoing — update when resolved)
+      // Mark Daigneault (Garbs) — Thunder eliminated in West Conference Finals (lost to SAS)
       { player: "Mark Daigneault", team: "garbs", award: "COACH_PLAYOFF", place: "Conf Finals", pts: 3 },
       // NBA 2K Simulator
       { player: "Team Garbs", team: "garbs", award: "NBA2K", place: "Champion", pts: 2 },
@@ -386,50 +386,127 @@ function PageShell({ title, subtitle, action, children }) {
 }
 
 function StandingsPage() {
+  const mob = useIsMobile();
   const scores = calcTeamScores(AWARDS);
   const sorted = [...TEAMS].sort((a, b) => (scores[b.id]||0) - (scores[a.id]||0));
+  const max = Math.max(...Object.values(scores), 1);
+  const fmtPts = (pts) => pts % 1 === 0 ? pts : pts.toFixed(1);
+
+  const topPlayer = (teamId) => {
+    const twoWaySet = {};
+    TEAMS.forEach(t => t.twoWay.forEach(p => twoWaySet[p] = t.id));
+    const playerTotals = {};
+    AWARDS.forEach(a => {
+      if (a.team !== teamId || a.pts === 0) return;
+      const mult = twoWaySet[a.player] === teamId ? 0.5 : 1;
+      playerTotals[a.player] = (playerTotals[a.player] || 0) + a.pts * mult;
+    });
+    const top = Object.entries(playerTotals).sort((a,b) => b[1]-a[1])[0];
+    return top ? { name: top[0], pts: top[1] } : null;
+  };
+
+  const awardCount = (teamId) => AWARDS.filter(a => a.team === teamId && a.pts > 0).length;
+  const champion = sorted[0];
+  const rest = sorted.slice(1);
+
   return (
-    <PageShell title="Standings" subtitle="2025-26 Award-based dynasty scoring">
-      <div style={CARD}>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 300 }}>
-            <thead>
-              <tr>
-                <th style={{ ...TH, width: 48 }}>RK</th>
-                <th style={TH}>TEAM</th>
-                <th style={{ ...TH, textAlign: "right", paddingRight: 20 }}>PTS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((team, i) => (
-                <tr key={team.id}>
-                  <td style={{ ...TD(i), textAlign: "center" }}>
-                    <span style={{ fontWeight: 800, fontSize: 16, color: i===0?C.red:C.g3 }}>{i+1}</span>
-                  </td>
-                  <td style={TD(i)}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 4, height: 32, borderRadius: 2, background: team.color }} />
-                      <div>
-                        <div style={{ fontWeight: 700 }}>{team.name}</div>
-                        <div style={{ fontSize: 11, color: C.g5 }}>{team.coach}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ ...TD(i), textAlign: "right", paddingRight: 20 }}>
-                    <span style={{ fontSize: 22, fontWeight: 800, color: team.color }}>
-                      {(scores[team.id]||0) % 1 === 0 ? scores[team.id]||0 : (scores[team.id]||0).toFixed(1)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div style={{ maxWidth: 980, margin: "0 auto", padding: mob ? "16px 12px 48px" : "28px 20px 60px" }}>
+      <div style={{ marginBottom: mob ? 16 : 24 }}>
+        <h1 style={{ fontSize: mob ? 20 : 28, fontWeight: 800, color: "#000", letterSpacing: -0.5 }}>Standings</h1>
+        <p style={{ fontSize: mob ? 11 : 13, color: C.g5, marginTop: 4 }}>2025-26 Season · Award-based dynasty scoring · Playoffs in progress</p>
+      </div>
+
+      {/* Champion Hero Card */}
+      <div style={{
+        background: "linear-gradient(135deg, " + champion.color + " 0%, " + champion.color + "cc 100%)",
+        borderRadius: 16, padding: mob ? "24px 20px" : "36px 40px",
+        marginBottom: 16, position: "relative", overflow: "hidden",
+        boxShadow: "0 8px 32px " + champion.color + "40",
+      }}>
+        <div style={{ position: "absolute", right: -20, top: -20, width: 180, height: 180, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
+        <div style={{ position: "absolute", right: 40, bottom: -40, width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
+        <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Current Leader - 2025-26</div>
+            <div style={{ fontSize: mob ? 36 : 52, fontWeight: 900, color: "#fff", letterSpacing: -2, lineHeight: 1 }}>{champion.name}</div>
+            <div style={{ fontSize: mob ? 12 : 14, color: "rgba(255,255,255,0.75)", marginTop: 8, fontWeight: 600 }}>HC: {champion.coach}</div>
+            <div style={{ display: "flex", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
+              {topPlayer(champion.id) && (
+                <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 8, padding: "8px 14px" }}>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Top Player</div>
+                  <div style={{ fontSize: 14, color: "#fff", fontWeight: 700, marginTop: 2 }}>{topPlayer(champion.id).name} - {fmtPts(topPlayer(champion.id).pts)} pts</div>
+                </div>
+              )}
+              <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 8, padding: "8px 14px" }}>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Awards</div>
+                <div style={{ fontSize: 14, color: "#fff", fontWeight: 700, marginTop: 2 }}>{awardCount(champion.id)} scored</div>
+              </div>
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: mob ? 56 : 80, fontWeight: 900, color: "#fff", lineHeight: 1, letterSpacing: -3 }}>{fmtPts(scores[champion.id]||0)}</div>
+            <div style={{ fontSize: 16, color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>points</div>
+            <div style={{ marginTop: 12, background: "rgba(255,255,255,0.2)", borderRadius: 20, padding: "4px 14px", display: "inline-block" }}>
+              <span style={{ fontSize: 12, color: "#fff", fontWeight: 800 }}>RANK 1</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: 24, height: 6, background: "rgba(255,255,255,0.2)", borderRadius: 3 }}>
+          <div style={{ width: "100%", height: "100%", background: "rgba(255,255,255,0.8)", borderRadius: 3 }} />
         </div>
       </div>
-    </PageShell>
+
+      {/* Rest of standings */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {rest.map((team, i) => {
+          const rank = i + 2;
+          const pts = scores[team.id] || 0;
+          const pct = (pts / max) * 100;
+          const top = topPlayer(team.id);
+          const gap = (scores[champion.id]||0) - pts;
+          return (
+            <div key={team.id} style={{ background: "#fff", borderRadius: 12, overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #E8E8E8", display: "flex", alignItems: "stretch" }}>
+              <div style={{ width: 6, background: team.color, flexShrink: 0 }} />
+              <div style={{ flex: 1, padding: mob ? "14px 16px" : "18px 24px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ width: mob ? 36 : 44, height: mob ? 36 : 44, borderRadius: "50%", background: team.color + "15", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: mob ? 18 : 22, fontWeight: 900, color: team.color }}>{rank}</span>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: mob ? 16 : 20, color: "#000" }}>{team.name}</div>
+                      <div style={{ fontSize: 11, color: C.g5, marginTop: 2 }}>HC: {team.coach}</div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: mob ? 28 : 36, fontWeight: 900, color: team.color, letterSpacing: -1, lineHeight: 1 }}>{fmtPts(pts)}</div>
+                    <div style={{ fontSize: 11, color: C.g5, marginTop: 2 }}>-{fmtPts(gap)} from lead</div>
+                  </div>
+                </div>
+                <div style={{ margin: "12px 0 8px", height: 8, background: C.g2, borderRadius: 4, overflow: "hidden" }}>
+                  <div style={{ width: pct + "%", height: "100%", background: team.color, borderRadius: 4 }} />
+                </div>
+                <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                  {top && <span style={{ fontSize: 11, color: C.g7 }}>Top: <strong>{top.name}</strong> {fmtPts(top.pts)} pts</span>}
+                  <span style={{ fontSize: 11, color: C.g7 }}>{awardCount(team.id)} awards scored</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ marginTop: 20, padding: "14px 20px", background: "#fff", borderRadius: 10, border: "1px solid #E8E8E8", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 20 }}>⚡</span>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 13, color: "#000" }}>Season still in progress</div>
+          <div style={{ fontSize: 12, color: C.g5, marginTop: 2 }}>NBA Finals ongoing - Final standings update when all awards are confirmed</div>
+        </div>
+        <div style={{ marginLeft: "auto", background: C.red, color: "#fff", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 20, whiteSpace: "nowrap" }}>LIVE</div>
+      </div>
+    </div>
   );
 }
-
 
 function awardLabel(a) {
   const m = {
