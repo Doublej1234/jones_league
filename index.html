@@ -7,15 +7,11 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Inter, -apple-system, sans-serif; background: #F5F5F5; }
-  </style>
 </head>
 <body>
   <div id="root"></div>
-  <script type="text/babel">
-import { useState, useRef, useEffect } from "react";
+  <script type="text/babel" data-type="module">
+const { useState, useRef, useEffect } = React;
 
 function useIsMobile() {
   const [mob, setMob] = useState(false);
@@ -2122,7 +2118,7 @@ function SchedulePage() {
   );
 }
 
-export default function App() {
+function App() {
   const [page, setPage] = useState("Standings");
   const [draftPicks, setDraftPicks] = useState(null);
   const [draftTrades, setDraftTrades] = useState([]);
@@ -2151,6 +2147,7 @@ export default function App() {
     </>
   );
 }
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
