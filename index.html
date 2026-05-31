@@ -385,7 +385,7 @@ function PageShell({ title, subtitle, action, children }) {
   );
 }
 
-function StandingsPage() {
+function StandingsPage({ onSelectTeam }) {
   const mob = useIsMobile();
   const scores = calcTeamScores(AWARDS);
   const sorted = [...TEAMS].sort((a, b) => (scores[b.id]||0) - (scores[a.id]||0));
@@ -428,7 +428,7 @@ function StandingsPage() {
         <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Current Leader - 2025-26</div>
-            <div style={{ fontSize: mob ? 36 : 52, fontWeight: 900, color: "#fff", letterSpacing: -2, lineHeight: 1 }}>{champion.name}</div>
+            <div style={{ fontSize: mob ? 36 : 52, fontWeight: 900, color: "#fff", letterSpacing: -2, lineHeight: 1, cursor: "pointer", textDecoration: "underline", textDecorationColor: "rgba(255,255,255,0.4)", textUnderlineOffset: 4 }} onClick={() => onSelectTeam(champion.id)}>{champion.name}</div>
             <div style={{ fontSize: mob ? 12 : 14, color: "rgba(255,255,255,0.75)", marginTop: 8, fontWeight: 600 }}>HC: {champion.coach}</div>
             <div style={{ display: "flex", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
               {topPlayer(champion.id) && (
@@ -474,7 +474,7 @@ function StandingsPage() {
                       <span style={{ fontSize: mob ? 18 : 22, fontWeight: 900, color: team.color }}>{rank}</span>
                     </div>
                     <div>
-                      <div style={{ fontWeight: 800, fontSize: mob ? 16 : 20, color: "#000" }}>{team.name}</div>
+                      <div style={{ fontWeight: 800, fontSize: mob ? 16 : 20, color: "#000", cursor: "pointer", textDecoration: "underline", textDecorationColor: "#ccc", textUnderlineOffset: 3 }} onClick={() => onSelectTeam(team.id)}>{team.name}</div>
                       <div style={{ fontSize: 11, color: C.g5, marginTop: 2 }}>HC: {team.coach}</div>
                     </div>
                   </div>
@@ -524,9 +524,9 @@ function awardLabel(a) {
 
 function getTeam(id) { return TEAMS.find(t => t.id === id); }
 
-function RostersPage({ draftPicks, draftTrades }) {
+function RostersPage({ draftPicks, draftTrades, initialTeam = "jake" }) {
   const mob = useIsMobile();
-  const [selected, setSelected] = useState("jake");
+  const [selected, setSelected] = useState(initialTeam);
   const team = TEAMS.find(t => t.id === selected);
 
   // Build draft picks
@@ -2231,14 +2231,15 @@ function SchedulePage() {
 
 function App() {
   const [page, setPage] = useState("Standings");
+  const [rosterTeam, setRosterTeam] = useState("jake");
   const [draftPicks, setDraftPicks] = useState(null);
   const [draftTrades, setDraftTrades] = useState([]);
   return (
     <>
       <style>{"* { box-sizing: border-box; margin: 0; padding: 0; } body { background: #F5F5F5; font-family: Inter, sans-serif; overflow-x: hidden; } button { font-family: Inter, sans-serif; } input, select { font-size: 16px; }"}</style>
       <Nav page={page} setPage={setPage} />
-      {page === "Standings" && <StandingsPage />}
-      {page === "Rosters" && <RostersPage draftPicks={draftPicks} draftTrades={draftTrades} />}
+      {page === "Standings" && <StandingsPage onSelectTeam={(id) => { setRosterTeam(id); setPage("Rosters"); }} />}
+      {page === "Rosters" && <RostersPage draftPicks={draftPicks} draftTrades={draftTrades} initialTeam={rosterTeam} />}
       {page === "Scoring" && <ScoringPage />}
       {page === "Available Players" && <FreeAgentsPage />}
       {page === "FA Coaches" && <FACoachesPage />}
