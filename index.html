@@ -290,27 +290,29 @@ const TEAM_COLORS = {
   TOR:{bg:"#CE1141",tx:"#FFF"}, UTA:{bg:"#002B5C",tx:"#F9A01B"}, WAS:{bg:"#002B5C",tx:"#E31837"},
 };
 
-const ESPN_TEAM_IDS = {
-  ATL: "atl", BOS: "bos", BKN: "bkn", CHA: "cha", CHI: "chi",
-  CLE: "cle", DAL: "dal", DEN: "den", DET: "det", GSW: "gs",
-  HOU: "hou", IND: "ind", LAC: "lac", LAL: "lal", MEM: "mem",
-  MIA: "mia", MIL: "mil", MIN: "min", NOP: "no", NYK: "ny",
-  OKC: "okc", ORL: "orl", PHI: "phi", PHX: "phx", POR: "por",
-  SAC: "sac", SAS: "sa", TOR: "tor", UTA: "utah", WAS: "wsh",
+const NBA_TEAM_IDS = {
+  ATL: 1610612737, BOS: 1610612738, BKN: 1610612751, CHA: 1610612766,
+  CHI: 1610612741, CLE: 1610612739, DAL: 1610612742, DEN: 1610612743,
+  DET: 1610612765, GSW: 1610612744, HOU: 1610612745, IND: 1610612754,
+  LAC: 1610612746, LAL: 1610612747, MEM: 1610612763, MIA: 1610612748,
+  MIL: 1610612749, MIN: 1610612750, NOP: 1610612740, NYK: 1610612752,
+  OKC: 1610612760, ORL: 1610612753, PHI: 1610612755, PHX: 1610612756,
+  POR: 1610612757, SAC: 1610612758, SAS: 1610612759, TOR: 1610612761,
+  UTA: 1610612762, WAS: 1610612764,
 };
 
 function TeamLogo({ nbaTeam, size = 32 }) {
   const [imgError, setImgError] = useState(false);
   const col = TEAM_COLORS[nbaTeam];
-  const abbr = ESPN_TEAM_IDS[nbaTeam];
+  const teamId = NBA_TEAM_IDS[nbaTeam];
   const fs = size <= 28 ? 7 : size <= 36 ? 8 : 10;
 
   if (!col) return <div style={{ width: size, height: size, borderRadius: 6, background: "#E8E8E8", flexShrink: 0 }} />;
 
-  if (abbr && !imgError) {
+  if (teamId && !imgError) {
     return (
       <img
-        src={`https://a.espncdn.com/i/teamlogos/nba/500/${abbr}.png`}
+        src={`https://cdn.nba.com/logos/nba/${teamId}/global/L/logo.svg`}
         alt={nbaTeam}
         onError={() => setImgError(true)}
         style={{ width: size, height: size, objectFit: "contain", flexShrink: 0 }}
