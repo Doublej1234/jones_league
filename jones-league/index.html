@@ -4,18 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jones League</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Inter, -apple-system, sans-serif; background: #F5F5F5; }
-  </style>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
+  <script>
+    Babel.registerPreset('custom', {
+      presets: [
+        [Babel.availablePresets['react']],
+        [Babel.availablePresets['env'], { targets: { browsers: ['last 2 versions'] }, modules: false }]
+      ]
+    });
+  </script>
 </head>
 <body>
   <div id="root"></div>
-  <script type="text/babel">
-import { useState, useRef, useEffect } from "react";
+  <script type="text/babel" data-presets="custom">
+const { useState, useRef, useEffect } = React;
 
 function useIsMobile() {
   const [mob, setMob] = useState(false);
@@ -153,7 +157,7 @@ const AWARDS = [
       { player: "Luka Doncic", team: "jordan", award: "SCORING_TITLE", place: null, pts: 3 },
       // Conference Finals MVP (playoff series MVP — 3pts per scoring system)
       { player: "Jalen Brunson", team: "garbs", award: "CONF_MVP", place: "East Finals MVP", pts: 3 },
-      // West Finals MVP pending — Game 7 OKC vs SAS not yet played (update when decided)
+      { player: "Victor Wembanyama", team: "jake", award: "CONF_MVP", place: "West Finals MVP", pts: 3 },
       { player: "Nikola Jokic", team: "cooper", award: "STAT_LEADERS", place: "Assists", pts: 1 },
       { player: "Victor Wembanyama", team: "jake", award: "STAT_LEADERS", place: "Blocks", pts: 1 },
       { player: "Dyson Daniels", team: "jake", award: "STAT_LEADERS", place: "Steals", pts: 1 },
@@ -169,7 +173,7 @@ const AWARDS = [
       { player: "Ime Udoka", team: "jordan", award: "COACH_PLAYOFF", place: "1st Round Exit", pts: 1 },
       // Assistant coaches — fired = +1pt (Season 3)
       { player: "Willie Green", team: "jordan", award: "ASST_COACH_FIRED", place: "Fired Nov 15, 2025", pts: 1 },
-      // Mark Daigneault (Garbs) — Thunder in Conference Finals (still ongoing — update when resolved)
+      // Mark Daigneault (Garbs) — Thunder eliminated in West Conference Finals (lost to SAS)
       { player: "Mark Daigneault", team: "garbs", award: "COACH_PLAYOFF", place: "Conf Finals", pts: 3 },
       // NBA 2K Simulator
       { player: "Team Garbs", team: "garbs", award: "NBA2K", place: "Champion", pts: 2 },
@@ -286,10 +290,36 @@ const TEAM_COLORS = {
   TOR:{bg:"#CE1141",tx:"#FFF"}, UTA:{bg:"#002B5C",tx:"#F9A01B"}, WAS:{bg:"#002B5C",tx:"#E31837"},
 };
 
+const NBA_TEAM_IDS = {
+  ATL: 1610612737, BOS: 1610612738, BKN: 1610612751, CHA: 1610612766,
+  CHI: 1610612741, CLE: 1610612739, DAL: 1610612742, DEN: 1610612743,
+  DET: 1610612765, GSW: 1610612744, HOU: 1610612745, IND: 1610612754,
+  LAC: 1610612746, LAL: 1610612747, MEM: 1610612763, MIA: 1610612748,
+  MIL: 1610612749, MIN: 1610612750, NOP: 1610612740, NYK: 1610612752,
+  OKC: 1610612760, ORL: 1610612753, PHI: 1610612755, PHX: 1610612756,
+  POR: 1610612757, SAC: 1610612758, SAS: 1610612759, TOR: 1610612761,
+  UTA: 1610612762, WAS: 1610612764,
+};
+
 function TeamLogo({ nbaTeam, size = 32 }) {
+  const [imgError, setImgError] = useState(false);
   const col = TEAM_COLORS[nbaTeam];
+  const teamId = NBA_TEAM_IDS[nbaTeam];
   const fs = size <= 28 ? 7 : size <= 36 ? 8 : 10;
+
   if (!col) return <div style={{ width: size, height: size, borderRadius: 6, background: "#E8E8E8", flexShrink: 0 }} />;
+
+  if (teamId && !imgError) {
+    return (
+      <img
+        src={`https://cdn.nba.com/logos/nba/${teamId}/global/L/logo.svg`}
+        alt={nbaTeam}
+        onError={() => setImgError(true)}
+        style={{ width: size, height: size, objectFit: "contain", flexShrink: 0 }}
+      />
+    );
+  }
+
   return (
     <div style={{
       width: size, height: size, borderRadius: 6, flexShrink: 0,
@@ -306,8 +336,23 @@ function Nav({ page, setPage }) {
   return (
     <div style={{ position: "sticky", top: 0, zIndex: 100 }}>
       <div style={{ background: "#000", display: "flex", alignItems: "stretch", minHeight: mob ? 48 : 56, padding: mob ? "0 10px" : "0 20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: 16, paddingRight: 16, borderRight: "1px solid #333", flexShrink: 0 }}>
-          <div style={{ fontSize: mob ? 12 : 15, fontWeight: 800, color: "#fff", letterSpacing: -0.3 }}>Jones League</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 16, paddingRight: 16, borderRight: "1px solid #333", flexShrink: 0 }}>
+          <svg width={mob ? 26 : 32} height={mob ? 26 : 32} viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+            <defs><clipPath id="bc"><circle cx="40" cy="40" r="37"/></clipPath></defs>
+            <circle cx="40" cy="40" r="38" fill="#C8102E"/>
+            <path d="M28,2.5 Q20,40 28,77.5 Q32,79 36,79.5 Q40,80 44,79.5 Q48,79 52,77.5 Q60,40 52,2.5 Q48,1 44,0.5 Q40,0 36,0.5 Q32,1 28,2.5Z" fill="#1D428A"/>
+            <g clipPath="url(#bc)">
+              <line x1="40" y1="0" x2="40" y2="80" stroke="#fff" strokeWidth="2" opacity="0.6"/>
+              <path d="M2,40 Q40,34 78,40" stroke="#fff" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.8"/>
+              <path d="M8,8 Q32,40 8,72" stroke="#fff" strokeWidth="2.8" fill="none" strokeLinecap="round"/>
+              <path d="M72,8 Q48,40 72,72" stroke="#fff" strokeWidth="2.8" fill="none" strokeLinecap="round"/>
+            </g>
+            <text x="40" y="48" textAnchor="middle" fontFamily="Arial Black, Arial, sans-serif" fontSize="22" fontWeight="900" fill="#fff" letterSpacing="-1">JL</text>
+          </svg>
+          <div>
+            <div style={{ fontSize: mob ? 12 : 15, fontWeight: 800, color: "#fff", letterSpacing: -0.3, lineHeight: 1.1 }}>Jones League</div>
+            {!mob && <div style={{ fontSize: 9, color: "#888", letterSpacing: 1.5, textTransform: "uppercase" }}>Dynasty Fantasy League</div>}
+          </div>
         </div>
         <div style={{ display: "flex", alignItems: "stretch", flex: 1, overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           <div style={{ display: "flex", alignItems: "stretch", minWidth: "max-content" }}>
@@ -355,51 +400,128 @@ function PageShell({ title, subtitle, action, children }) {
   );
 }
 
-function StandingsPage() {
+function StandingsPage({ onSelectTeam }) {
+  const mob = useIsMobile();
   const scores = calcTeamScores(AWARDS);
   const sorted = [...TEAMS].sort((a, b) => (scores[b.id]||0) - (scores[a.id]||0));
+  const max = Math.max(...Object.values(scores), 1);
+  const fmtPts = (pts) => pts % 1 === 0 ? pts : pts.toFixed(1);
+
+  const topPlayer = (teamId) => {
+    const twoWaySet = {};
+    TEAMS.forEach(t => t.twoWay.forEach(p => twoWaySet[p] = t.id));
+    const playerTotals = {};
+    AWARDS.forEach(a => {
+      if (a.team !== teamId || a.pts === 0) return;
+      const mult = twoWaySet[a.player] === teamId ? 0.5 : 1;
+      playerTotals[a.player] = (playerTotals[a.player] || 0) + a.pts * mult;
+    });
+    const top = Object.entries(playerTotals).sort((a,b) => b[1]-a[1])[0];
+    return top ? { name: top[0], pts: top[1] } : null;
+  };
+
+  const awardCount = (teamId) => AWARDS.filter(a => a.team === teamId && a.pts > 0).length;
+  const champion = sorted[0];
+  const rest = sorted.slice(1);
+
   return (
-    <PageShell title="Standings" subtitle="2025-26 Award-based dynasty scoring">
-      <div style={CARD}>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 300 }}>
-            <thead>
-              <tr>
-                <th style={{ ...TH, width: 48 }}>RK</th>
-                <th style={TH}>TEAM</th>
-                <th style={{ ...TH, textAlign: "right", paddingRight: 20 }}>PTS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((team, i) => (
-                <tr key={team.id}>
-                  <td style={{ ...TD(i), textAlign: "center" }}>
-                    <span style={{ fontWeight: 800, fontSize: 16, color: i===0?C.red:C.g3 }}>{i+1}</span>
-                  </td>
-                  <td style={TD(i)}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 4, height: 32, borderRadius: 2, background: team.color }} />
-                      <div>
-                        <div style={{ fontWeight: 700 }}>{team.name}</div>
-                        <div style={{ fontSize: 11, color: C.g5 }}>{team.coach}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ ...TD(i), textAlign: "right", paddingRight: 20 }}>
-                    <span style={{ fontSize: 22, fontWeight: 800, color: team.color }}>
-                      {(scores[team.id]||0) % 1 === 0 ? scores[team.id]||0 : (scores[team.id]||0).toFixed(1)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div style={{ maxWidth: 980, margin: "0 auto", padding: mob ? "16px 12px 48px" : "28px 20px 60px" }}>
+      <div style={{ marginBottom: mob ? 16 : 24 }}>
+        <h1 style={{ fontSize: mob ? 20 : 28, fontWeight: 800, color: "#000", letterSpacing: -0.5 }}>Standings</h1>
+        <p style={{ fontSize: mob ? 11 : 13, color: C.g5, marginTop: 4 }}>2025-26 Season · Award-based dynasty scoring · Playoffs in progress</p>
+      </div>
+
+      {/* Champion Hero Card */}
+      <div style={{
+        background: "linear-gradient(135deg, " + champion.color + " 0%, " + champion.color + "cc 100%)",
+        borderRadius: 16, padding: mob ? "24px 20px" : "36px 40px",
+        marginBottom: 16, position: "relative", overflow: "hidden",
+        boxShadow: "0 8px 32px " + champion.color + "40",
+      }}>
+        <div style={{ position: "absolute", right: -20, top: -20, width: 180, height: 180, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
+        <div style={{ position: "absolute", right: 40, bottom: -40, width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
+        <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Current Leader - 2025-26</div>
+            <div style={{ fontSize: mob ? 36 : 52, fontWeight: 900, color: "#fff", letterSpacing: -2, lineHeight: 1, cursor: "pointer", textDecoration: "underline", textDecorationColor: "rgba(255,255,255,0.4)", textUnderlineOffset: 4 }} onClick={() => onSelectTeam(champion.id)}>{champion.name}</div>
+            <div style={{ fontSize: mob ? 12 : 14, color: "rgba(255,255,255,0.75)", marginTop: 8, fontWeight: 600 }}>HC: {champion.coach}</div>
+            <div style={{ display: "flex", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
+              {topPlayer(champion.id) && (
+                <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 8, padding: "8px 14px" }}>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Top Player</div>
+                  <div style={{ fontSize: 14, color: "#fff", fontWeight: 700, marginTop: 2 }}>{topPlayer(champion.id).name} - {fmtPts(topPlayer(champion.id).pts)} pts</div>
+                </div>
+              )}
+              <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 8, padding: "8px 14px" }}>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Awards</div>
+                <div style={{ fontSize: 14, color: "#fff", fontWeight: 700, marginTop: 2 }}>{awardCount(champion.id)} scored</div>
+              </div>
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: mob ? 56 : 80, fontWeight: 900, color: "#fff", lineHeight: 1, letterSpacing: -3 }}>{fmtPts(scores[champion.id]||0)}</div>
+            <div style={{ fontSize: 16, color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>points</div>
+            <div style={{ marginTop: 12, background: "rgba(255,255,255,0.2)", borderRadius: 20, padding: "4px 14px", display: "inline-block" }}>
+              <span style={{ fontSize: 12, color: "#fff", fontWeight: 800 }}>RANK 1</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: 24, height: 6, background: "rgba(255,255,255,0.2)", borderRadius: 3 }}>
+          <div style={{ width: "100%", height: "100%", background: "rgba(255,255,255,0.8)", borderRadius: 3 }} />
         </div>
       </div>
-    </PageShell>
+
+      {/* Rest of standings */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {rest.map((team, i) => {
+          const rank = i + 2;
+          const pts = scores[team.id] || 0;
+          const pct = (pts / max) * 100;
+          const top = topPlayer(team.id);
+          const gap = (scores[champion.id]||0) - pts;
+          return (
+            <div key={team.id} style={{ background: "#fff", borderRadius: 12, overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #E8E8E8", display: "flex", alignItems: "stretch" }}>
+              <div style={{ width: 6, background: team.color, flexShrink: 0 }} />
+              <div style={{ flex: 1, padding: mob ? "14px 16px" : "18px 24px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ width: mob ? 36 : 44, height: mob ? 36 : 44, borderRadius: "50%", background: team.color + "15", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: mob ? 18 : 22, fontWeight: 900, color: team.color }}>{rank}</span>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: mob ? 16 : 20, color: "#000", cursor: "pointer", textDecoration: "underline", textDecorationColor: "#ccc", textUnderlineOffset: 3 }} onClick={() => onSelectTeam(team.id)}>{team.name}</div>
+                      <div style={{ fontSize: 11, color: C.g5, marginTop: 2 }}>HC: {team.coach}</div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: mob ? 28 : 36, fontWeight: 900, color: team.color, letterSpacing: -1, lineHeight: 1 }}>{fmtPts(pts)}</div>
+                    <div style={{ fontSize: 11, color: C.g5, marginTop: 2 }}>-{fmtPts(gap)} from lead</div>
+                  </div>
+                </div>
+                <div style={{ margin: "12px 0 8px", height: 8, background: C.g2, borderRadius: 4, overflow: "hidden" }}>
+                  <div style={{ width: pct + "%", height: "100%", background: team.color, borderRadius: 4 }} />
+                </div>
+                <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                  {top && <span style={{ fontSize: 11, color: C.g7 }}>Top: <strong>{top.name}</strong> {fmtPts(top.pts)} pts</span>}
+                  <span style={{ fontSize: 11, color: C.g7 }}>{awardCount(team.id)} awards scored</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ marginTop: 20, padding: "14px 20px", background: "#fff", borderRadius: 10, border: "1px solid #E8E8E8", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 20 }}>⚡</span>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 13, color: "#000" }}>Season still in progress</div>
+          <div style={{ fontSize: 12, color: C.g5, marginTop: 2 }}>NBA Finals ongoing - Final standings update when all awards are confirmed</div>
+        </div>
+        <div style={{ marginLeft: "auto", background: C.red, color: "#fff", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 20, whiteSpace: "nowrap" }}>LIVE</div>
+      </div>
+    </div>
   );
 }
-
 
 function awardLabel(a) {
   const m = {
@@ -417,9 +539,9 @@ function awardLabel(a) {
 
 function getTeam(id) { return TEAMS.find(t => t.id === id); }
 
-function RostersPage({ draftPicks, draftTrades }) {
+function RostersPage({ draftPicks, draftTrades, initialTeam = "jake" }) {
   const mob = useIsMobile();
-  const [selected, setSelected] = useState("jake");
+  const [selected, setSelected] = useState(initialTeam);
   const team = TEAMS.find(t => t.id === selected);
 
   // Build draft picks
@@ -2122,16 +2244,17 @@ function SchedulePage() {
   );
 }
 
-export default function App() {
+function App() {
   const [page, setPage] = useState("Standings");
+  const [rosterTeam, setRosterTeam] = useState("jake");
   const [draftPicks, setDraftPicks] = useState(null);
   const [draftTrades, setDraftTrades] = useState([]);
   return (
     <>
       <style>{"* { box-sizing: border-box; margin: 0; padding: 0; } body { background: #F5F5F5; font-family: Inter, sans-serif; overflow-x: hidden; } button { font-family: Inter, sans-serif; } input, select { font-size: 16px; }"}</style>
       <Nav page={page} setPage={setPage} />
-      {page === "Standings" && <StandingsPage />}
-      {page === "Rosters" && <RostersPage draftPicks={draftPicks} draftTrades={draftTrades} />}
+      {page === "Standings" && <StandingsPage onSelectTeam={(id) => { setRosterTeam(id); setPage("Rosters"); }} />}
+      {page === "Rosters" && <RostersPage draftPicks={draftPicks} draftTrades={draftTrades} initialTeam={rosterTeam} />}
       {page === "Scoring" && <ScoringPage />}
       {page === "Available Players" && <FreeAgentsPage />}
       {page === "FA Coaches" && <FACoachesPage />}
@@ -2152,8 +2275,8 @@ export default function App() {
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
   </script>
 </body>
 </html>
