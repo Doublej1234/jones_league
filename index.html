@@ -7,10 +7,18 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
+  <script>
+    Babel.registerPreset('custom', {
+      presets: [
+        [Babel.availablePresets['react']],
+        [Babel.availablePresets['env'], { targets: { browsers: ['last 2 versions'] }, modules: false }]
+      ]
+    });
+  </script>
 </head>
 <body>
   <div id="root"></div>
-  <script type="text/babel" data-presets="react">
+  <script type="text/babel" data-presets="custom">
 const { useState, useRef, useEffect } = React;
 
 function useIsMobile() {
@@ -282,10 +290,34 @@ const TEAM_COLORS = {
   TOR:{bg:"#CE1141",tx:"#FFF"}, UTA:{bg:"#002B5C",tx:"#F9A01B"}, WAS:{bg:"#002B5C",tx:"#E31837"},
 };
 
+const ESPN_TEAM_IDS = {
+  ATL: "atl", BOS: "bos", BKN: "bkn", CHA: "cha", CHI: "chi",
+  CLE: "cle", DAL: "dal", DEN: "den", DET: "det", GSW: "gs",
+  HOU: "hou", IND: "ind", LAC: "lac", LAL: "lal", MEM: "mem",
+  MIA: "mia", MIL: "mil", MIN: "min", NOP: "no", NYK: "ny",
+  OKC: "okc", ORL: "orl", PHI: "phi", PHX: "phx", POR: "por",
+  SAC: "sac", SAS: "sa", TOR: "tor", UTA: "utah", WAS: "wsh",
+};
+
 function TeamLogo({ nbaTeam, size = 32 }) {
+  const [imgError, setImgError] = useState(false);
   const col = TEAM_COLORS[nbaTeam];
+  const abbr = ESPN_TEAM_IDS[nbaTeam];
   const fs = size <= 28 ? 7 : size <= 36 ? 8 : 10;
+
   if (!col) return <div style={{ width: size, height: size, borderRadius: 6, background: "#E8E8E8", flexShrink: 0 }} />;
+
+  if (abbr && !imgError) {
+    return (
+      <img
+        src={`https://a.espncdn.com/i/teamlogos/nba/500/${abbr}.png`}
+        alt={nbaTeam}
+        onError={() => setImgError(true)}
+        style={{ width: size, height: size, objectFit: "contain", flexShrink: 0 }}
+      />
+    );
+  }
+
   return (
     <div style={{
       width: size, height: size, borderRadius: 6, flexShrink: 0,
