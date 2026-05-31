@@ -337,7 +337,7 @@ function Nav({ page, setPage }) {
     <div style={{ position: "sticky", top: 0, zIndex: 100 }}>
       <div style={{ background: "#000", display: "flex", alignItems: "stretch", minHeight: mob ? 48 : 56, padding: mob ? "0 10px" : "0 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 16, paddingRight: 16, borderRight: "1px solid #333", flexShrink: 0 }}>
-<span id="jl-logo-slot" style="flex-shrink:0;width:32px;height:32px;display:inline-block;"></span>
+<span id="jl-logo-slot" style="width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;"></span>
           <div>
             <div style={{ fontSize: mob ? 12 : 15, fontWeight: 800, color: "#fff", letterSpacing: -0.3, lineHeight: 1.1 }}>Jones League</div>
             {!mob && <div style={{ fontSize: 9, color: "#888", letterSpacing: 1.5, textTransform: "uppercase" }}>Dynasty Fantasy League</div>}
@@ -2267,17 +2267,44 @@ function App() {
 
 ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
   </script>
+
+
+<svg id="jl-nav-logo" style="display:none" width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="ball5"><circle cx="40" cy="40" r="37"/></clipPath>
+    <mask id="tm5">
+      <rect width="80" height="80" fill="white"/>
+      <rect x="22" y="28" width="36" height="22" rx="3" fill="black"/>
+    </mask>
+  </defs>
+  <circle cx="40" cy="40" r="38" fill="#C8102E"/>
+  <path d="M28,2.5 Q20,40 28,77.5 Q32,79 36,79.5 Q40,80 44,79.5 Q48,79 52,77.5 Q60,40 52,2.5 Q48,1 44,0.5 Q40,0 36,0.5 Q32,1 28,2.5Z" fill="#1D428A"/>
+  <g clip-path="url(#ball5)">
+    <line x1="40" y1="0" x2="40" y2="80" stroke="white" stroke-width="2" opacity="0.6" mask="url(#tm5)"/>
+    <path d="M2,40 Q40,34 78,40" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8" mask="url(#tm5)"/>
+  </g>
+  <path d="M10,4 Q22,40 10,76" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" clip-path="url(#ball5)"/>
+  <path d="M70,4 Q58,40 70,76" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" clip-path="url(#ball5)"/>
+  <text x="40" y="50" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="22" font-weight="900" fill="white">JL</text>
+</svg>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  function injectLogo() {
+window.addEventListener("load", function() {
+  function tryInject() {
     var slot = document.getElementById("jl-logo-slot");
-    if (slot) {
-      slot.innerHTML = '<svg width="32" height="32" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="40" r="38" fill="#C8102E"/><path d="M28,2.5 Q20,40 28,77.5 Q32,79 36,79.5 Q40,80 44,79.5 Q48,79 52,77.5 Q60,40 52,2.5 Q48,1 44,0.5 Q40,0 36,0.5 Q32,1 28,2.5Z" fill="#1D428A"/><line x1="40" y1="2" x2="40" y2="78" stroke="white" stroke-width="2" opacity="0.6"/><path d="M2,40 Q40,34 78,40" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/><path d="M16,5 Q32,40 16,75" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M64,5 Q48,40 64,75" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/><text x="40" y="50" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="22" font-weight="900" fill="white">JL</text></svg>';
+    var logo = document.getElementById("jl-nav-logo");
+    if (slot && logo) {
+      var clone = logo.cloneNode(true);
+      clone.removeAttribute("id");
+      clone.removeAttribute("style");
+      clone.setAttribute("width", "32");
+      clone.setAttribute("height", "32");
+      clone.style.flexShrink = "0";
+      slot.appendChild(clone);
     } else {
-      setTimeout(injectLogo, 200);
+      setTimeout(tryInject, 300);
     }
   }
-  setTimeout(injectLogo, 500);
+  setTimeout(tryInject, 800);
 });
 </script>
 </body>
