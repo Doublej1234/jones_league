@@ -338,16 +338,13 @@ function Nav({ page, setPage }) {
       <div style={{ background: "#000", display: "flex", alignItems: "stretch", minHeight: mob ? 48 : 56, padding: mob ? "0 10px" : "0 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 16, paddingRight: 16, borderRight: "1px solid #333", flexShrink: 0 }}>
           <svg width={mob ? 26 : 32} height={mob ? 26 : 32} viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-            <defs><clipPath id="bc"><circle cx="40" cy="40" r="37"/></clipPath></defs>
             <circle cx="40" cy="40" r="38" fill="#C8102E"/>
             <path d="M28,2.5 Q20,40 28,77.5 Q32,79 36,79.5 Q40,80 44,79.5 Q48,79 52,77.5 Q60,40 52,2.5 Q48,1 44,0.5 Q40,0 36,0.5 Q32,1 28,2.5Z" fill="#1D428A"/>
-            <g clipPath="url(#bc)">
-              <line x1="40" y1="0" x2="40" y2="80" stroke="#fff" strokeWidth="2" opacity="0.6"/>
-              <path d="M2,40 Q40,34 78,40" stroke="#fff" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.8"/>
-              <path d="M16,4 Q32,40 16,76" stroke="#fff" strokeWidth="2.8" fill="none" strokeLinecap="round"/>
-              <path d="M64,4 Q48,40 64,76" stroke="#fff" strokeWidth="2.8" fill="none" strokeLinecap="round"/>
-            </g>
-            <text x="40" y="48" textAnchor="middle" fontFamily="Arial Black, Arial, sans-serif" fontSize="22" fontWeight="900" fill="#fff" letterSpacing="-1">JL</text>
+            <line x1="40" y1="2" x2="40" y2="78" stroke="#fff" strokeWidth="2" opacity="0.6"/>
+            <path d="M2,40 Q40,34 78,40" stroke="#fff" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.8"/>
+            <path d="M16,5 Q32,40 16,75" stroke="#fff" strokeWidth="2.8" fill="none" strokeLinecap="round"/>
+            <path d="M64,5 Q48,40 64,75" stroke="#fff" strokeWidth="2.8" fill="none" strokeLinecap="round"/>
+            <text x="40" y="48" textAnchor="middle" style={{ font: "bold 22px Arial Black, Arial, sans-serif" }} fill="#fff">JL</text>
           </svg>
           <div>
             <div style={{ fontSize: mob ? 12 : 15, fontWeight: 800, color: "#fff", letterSpacing: -0.3, lineHeight: 1.1 }}>Jones League</div>
