@@ -16,7 +16,36 @@
     });
   </script>
 </head>
-<body>
+<body><style>
+#jl-fixed-logo {
+  position: fixed;
+  top: 12px;
+  left: 16px;
+  width: 32px;
+  height: 32px;
+  z-index: 9999;
+  pointer-events: none;
+}
+</style>
+<svg id="jl-fixed-logo" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="bc"><circle cx="40" cy="40" r="37"/></clipPath>
+    <mask id="tm">
+      <rect width="80" height="80" fill="white"/>
+      <rect x="22" y="28" width="36" height="22" rx="3" fill="black"/>
+    </mask>
+  </defs>
+  <circle cx="40" cy="40" r="38" fill="#C8102E"/>
+  <path d="M28,2.5 Q20,40 28,77.5 Q32,79 36,79.5 Q40,80 44,79.5 Q48,79 52,77.5 Q60,40 52,2.5 Q48,1 44,0.5 Q40,0 36,0.5 Q32,1 28,2.5Z" fill="#1D428A"/>
+  <g clip-path="url(#bc)">
+    <line x1="40" y1="0" x2="40" y2="80" stroke="white" stroke-width="2" opacity="0.6" mask="url(#tm)"/>
+    <path d="M2,40 Q40,34 78,40" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8" mask="url(#tm)"/>
+  </g>
+  <path d="M10,4 Q22,40 10,76" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" clip-path="url(#bc)"/>
+  <path d="M70,4 Q58,40 70,76" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" clip-path="url(#bc)"/>
+  <text x="40" y="50" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="22" font-weight="900" fill="white">JL</text>
+</svg>
+
   <div id="root"></div>
   <script type="text/babel" data-presets="custom">
 const { useState, useRef, useEffect } = React;
@@ -2269,43 +2298,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   </script>
 
 
-<svg id="jl-nav-logo" style="display:none" width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <clipPath id="ball5"><circle cx="40" cy="40" r="37"/></clipPath>
-    <mask id="tm5">
-      <rect width="80" height="80" fill="white"/>
-      <rect x="22" y="28" width="36" height="22" rx="3" fill="black"/>
-    </mask>
-  </defs>
-  <circle cx="40" cy="40" r="38" fill="#C8102E"/>
-  <path d="M28,2.5 Q20,40 28,77.5 Q32,79 36,79.5 Q40,80 44,79.5 Q48,79 52,77.5 Q60,40 52,2.5 Q48,1 44,0.5 Q40,0 36,0.5 Q32,1 28,2.5Z" fill="#1D428A"/>
-  <g clip-path="url(#ball5)">
-    <line x1="40" y1="0" x2="40" y2="80" stroke="white" stroke-width="2" opacity="0.6" mask="url(#tm5)"/>
-    <path d="M2,40 Q40,34 78,40" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8" mask="url(#tm5)"/>
-  </g>
-  <path d="M10,4 Q22,40 10,76" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" clip-path="url(#ball5)"/>
-  <path d="M70,4 Q58,40 70,76" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" clip-path="url(#ball5)"/>
-  <text x="40" y="50" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="22" font-weight="900" fill="white">JL</text>
-</svg>
-<script>
-window.addEventListener("load", function() {
-  function tryInject() {
-    var slot = document.getElementById("jl-logo-slot");
-    var logo = document.getElementById("jl-nav-logo");
-    if (slot && logo) {
-      var clone = logo.cloneNode(true);
-      clone.removeAttribute("id");
-      clone.removeAttribute("style");
-      clone.setAttribute("width", "32");
-      clone.setAttribute("height", "32");
-      clone.style.flexShrink = "0";
-      slot.appendChild(clone);
-    } else {
-      setTimeout(tryInject, 300);
-    }
-  }
-  setTimeout(tryInject, 800);
-});
-</script>
 </body>
 </html>
